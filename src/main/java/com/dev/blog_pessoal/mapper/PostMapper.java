@@ -4,6 +4,7 @@ import com.dev.blog_pessoal.dto.PostRequestDTO;
 import com.dev.blog_pessoal.model.PostModel;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class PostMapper {
     public static PostModel toEntity(PostRequestDTO requestDTO){
@@ -11,7 +12,7 @@ public class PostMapper {
         model.setTitle(requestDTO.title());
         model.setDescription(requestDTO.description());
         model.setCategory(requestDTO.category());
-        model.setDataCriacao(LocalDateTime.now());
+        model.setDataCriacao(OffsetDateTime.now());
 
         return model;
     }
