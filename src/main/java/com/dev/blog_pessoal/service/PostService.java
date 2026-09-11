@@ -1,45 +1,59 @@
 package com.dev.blog_pessoal.service;
 
+import com.dev.blog_pessoal.dto.PostDTO;
+import com.dev.blog_pessoal.mapper.PostMapper;
 import com.dev.blog_pessoal.model.PostModel;
 import com.dev.blog_pessoal.repository.PostRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
-    private PostRepository repository;
+    private final PostRepository repository;
+    private final PostMapper mapper;
 
-    public PostService(PostRepository repository){this.repository = repository;}
+    public PostService(PostRepository repository, PostMapper mapper){
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     // CREATE
-    public PostModel create(PostModel postagem){
-        return repository.save(postagem);
+    public PostDTO create(PostDTO postagem){
+        PostModel postCriado = mapper.toPostModel(postagem);
+        postCriado = repository.save(postCriado);
+        return mapper.toPostDTO(postCriado);
     }
 
     // READ
-    public List<PostModel> getAll(){
-        return repository.findAll();
+    public List<PostDTO> getAll(){
+        List<PostModel> postagens = repository.findAll();
+        return postagens.stream()
+                .map(mapper::toPostDTO)
+                .collect(Collectors.toList());
     }
 
     // READ BY ID
-    public Optional<PostModel> getById(Long id) {
-        return repository.findById(id);
+    public Optional<PostDTO> getById(Long id) {
+        Optional<PostModel> postEncontrado = repository.findById(id);
+        return postEncontrado.map(mapper::toPostDTO);
     }
 
     // UPDATE
-    public PostModel update(Long id, PostModel postAtualizado){
+    public PostDTO update(Long id, PostDTO postDTO){
        Optional<PostModel> postEncontrado = repository.findById(id);
-       postEncontrado.map(p -> {
-           p.setTitle(postAtualizado.getTitle());
-           p.setDescription(postAtualizado.getDescription());
-           p.setDataCriacao(postAtualizado.getDataCriacao());
-           p.setCategory(postAtualizado.getCategory());
-           return repository.save(p);
-       });
-       return null;
+
+       if(postEncontrado.isPresent()){
+           PostModel postAtualizado = mapper.toPostModel(postDTO);
+           postAtualizado.setId(id);
+           PostModel postSalvo = repository.save(postAtualizado);
+           return mapper.toPostDTO(postSalvo);
+       } else {
+           return null;
+       }
     }
 
     // DELETE

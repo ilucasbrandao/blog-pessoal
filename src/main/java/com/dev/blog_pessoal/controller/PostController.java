@@ -1,5 +1,6 @@
 package com.dev.blog_pessoal.controller;
 
+import com.dev.blog_pessoal.dto.PostDTO;
 import com.dev.blog_pessoal.model.PostModel;
 import com.dev.blog_pessoal.repository.PostRepository;
 import com.dev.blog_pessoal.service.PostService;
@@ -24,22 +25,22 @@ public class PostController {
     }
 
     @GetMapping("/listar")
-    public List<PostModel> getAll(){
+    public List<PostDTO> getAll(){
         return service.getAll();
     }
 
     @GetMapping("/listar/{id}")
-    public Optional<PostModel> getById(@PathVariable Long id){
+    public Optional<PostDTO> getById(@PathVariable Long id){
         return service.getById(id);
     }
 
     @PostMapping("/criar")
-    public PostModel create(@RequestBody PostModel postagem){
+    public PostDTO create(@RequestBody PostDTO postagem){
         return service.create(postagem);
     }
 
     @PutMapping("/atualizar/{id}")
-    public PostModel update(@PathVariable Long id, @RequestBody PostModel postagemAtualizada){
+    public PostDTO update(@PathVariable Long id, @RequestBody PostDTO postagemAtualizada){
         return service.update(id, postagemAtualizada);
     }
 
