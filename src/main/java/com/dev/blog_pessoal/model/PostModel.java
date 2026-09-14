@@ -21,18 +21,15 @@ public class PostModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Column(name = "title")
     private String title;
 
-    @NotBlank
     @Column(name = "description")
     private String description;
 
     @Column(name = "data_criacao")
     private OffsetDateTime dataCriacao;
 
-    @NotBlank
     @Column(name = "category")
     private String category;
 

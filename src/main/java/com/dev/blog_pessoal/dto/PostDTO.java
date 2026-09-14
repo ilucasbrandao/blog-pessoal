@@ -1,5 +1,6 @@
 package com.dev.blog_pessoal.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,8 +13,8 @@ import java.time.OffsetDateTime;
 public class PostDTO {
 
     private Long id;
-    private String title;
-    private String description;
+    private @NotBlank String title;
+    private @NotBlank String description;
     private OffsetDateTime dataCriacao;
-    private String category;
+    private @NotBlank String category;
 }
