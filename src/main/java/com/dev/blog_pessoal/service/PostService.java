@@ -1,6 +1,7 @@
 package com.dev.blog_pessoal.service;
 
 import com.dev.blog_pessoal.dto.PostDTO;
+import com.dev.blog_pessoal.exception.ResourceNotFoundException;
 import com.dev.blog_pessoal.mapper.PostMapper;
 import com.dev.blog_pessoal.model.PostModel;
 import com.dev.blog_pessoal.repository.PostRepository;
@@ -29,7 +30,7 @@ public class PostService {
     }
 
     // READ
-    public List<PostDTO> getAll(){
+    public List<PostDTO> getAll() {
         List<PostModel> postagens = repository.findAll();
         return postagens.stream()
                 .map(mapper::toPostDTO)
@@ -37,9 +38,9 @@ public class PostService {
     }
 
     // READ BY ID
-    public Optional<PostDTO> getById(Long id) {
-        Optional<PostModel> postEncontrado = repository.findById(id);
-        return postEncontrado.map(mapper::toPostDTO);
+    public PostDTO getById(Long id) {
+        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id not found"));
+        return mapper.toPostDTO(postEncontrado);
     }
 
     // UPDATE
