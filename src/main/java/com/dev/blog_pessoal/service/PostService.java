@@ -5,11 +5,10 @@ import com.dev.blog_pessoal.exception.ResourceNotFoundException;
 import com.dev.blog_pessoal.mapper.PostMapper;
 import com.dev.blog_pessoal.model.PostModel;
 import com.dev.blog_pessoal.repository.PostRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -30,35 +29,36 @@ public class PostService {
     }
 
     // READ
-    public List<PostDTO> getAll() {
-        List<PostModel> postagens = repository.findAll();
-        return postagens.stream()
-                .map(mapper::toPostDTO)
-                .collect(Collectors.toList());
+    public Page<PostDTO> getAll(Pageable pageable) {
+        // O findAll(pageable) já busca os dados paginados do banco
+        Page<PostModel> postagens = repository.findAll(pageable);
+        // O Page do Spring possui um metodo .map()
+         return postagens.map(mapper::toPostDTO);
     }
 
     // READ BY ID
     public PostDTO getById(Long id) {
-        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id not found"));
+        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
         return mapper.toPostDTO(postEncontrado);
     }
 
     // UPDATE
     public PostDTO update(Long id, PostDTO postDTO){
-       Optional<PostModel> postEncontrado = repository.findById(id);
+        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-       if(postEncontrado.isPresent()){
-           PostModel postAtualizado = mapper.toPostModel(postDTO);
-           postAtualizado.setId(id);
-           PostModel postSalvo = repository.save(postAtualizado);
-           return mapper.toPostDTO(postSalvo);
-       } else {
-           return null;
-       }
+        PostModel postAtualizado = mapper.toPostModel(postDTO);
+        postAtualizado.setId(id);
+        postAtualizado = repository.save(postAtualizado);
+
+        return mapper.toPostDTO(postAtualizado);
     }
 
     // DELETE
     public void delete(Long id){
+        if(!repository.existsById(id)){
+            throw new ResourceNotFoundException("Post not found with id: " +id);
+        }
+
         repository.deleteById(id);
     }
 

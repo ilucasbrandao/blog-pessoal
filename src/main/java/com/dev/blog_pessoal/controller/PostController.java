@@ -2,6 +2,9 @@ package com.dev.blog_pessoal.controller;
 
 import com.dev.blog_pessoal.dto.PostDTO;
 import com.dev.blog_pessoal.service.PostService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +28,9 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostDTO>> getAll(){
-        List<PostDTO> postagens = service.getAll();
-        return ResponseEntity.ok(postagens);
+    public ResponseEntity<List<PostDTO>> getAll(@PageableDefault(size = 10) Pageable pageable){
+        Page<PostDTO> postagens = service.getAll(pageable);
+        return ResponseEntity.ok(postagens.getContent());
     }
 
     @GetMapping("/{id}")
@@ -36,25 +39,21 @@ public class PostController {
         return ResponseEntity.ok(postById);
     }
 
-    @PostMapping("/criar")
+    @PostMapping
     public ResponseEntity<PostDTO> create(@RequestBody PostDTO postagem){
         PostDTO postCriado = service.create(postagem);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(postCriado);
     }
 
-    @PutMapping("/atualizar/{id}")
+    @PutMapping("/{id}")
     public PostDTO update(@PathVariable Long id, @RequestBody PostDTO postagemAtualizada){
         return service.update(id, postagemAtualizada);
     }
 
-    @DeleteMapping("/deletar/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id){
-        if(service.getById(id) != null){
-            service.delete(id);
-            return ResponseEntity.ok("Deletado com sucesso!");
-        } else {
-            return ResponseEntity.ok("Postagem excluida com sucesso");
-        }
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
