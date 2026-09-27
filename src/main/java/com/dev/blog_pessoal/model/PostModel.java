@@ -1,7 +1,6 @@
 package com.dev.blog_pessoal.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,5 +31,9 @@ public class PostModel {
 
     @Column(name = "category")
     private String category;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 }

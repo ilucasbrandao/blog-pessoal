@@ -4,62 +4,70 @@ import com.dev.blog_pessoal.dto.PostDTO;
 import com.dev.blog_pessoal.exception.ResourceNotFoundException;
 import com.dev.blog_pessoal.mapper.PostMapper;
 import com.dev.blog_pessoal.model.PostModel;
+import com.dev.blog_pessoal.model.User;
 import com.dev.blog_pessoal.repository.PostRepository;
+import com.dev.blog_pessoal.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class PostService {
 
     private final PostRepository repository;
+    private final UserRepository userRepository;
     private final PostMapper mapper;
 
-    public PostService(PostRepository repository, PostMapper mapper){
+    public PostService(PostRepository repository, UserRepository userRepository, PostMapper mapper){
         this.repository = repository;
+        this.userRepository = userRepository;
         this.mapper = mapper;
     }
 
     // CREATE
-    public PostDTO create(PostDTO postagem){
-        PostModel postCriado = mapper.toPostModel(postagem);
+    public PostDTO create(PostDTO postagem, String userEmail){
+        User autor = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + userEmail));
+
+        PostModel postCriado = mapper.toPostModel(postagem, autor);
         postCriado = repository.save(postCriado);
+
         return mapper.toPostDTO(postCriado);
     }
 
     // READ
     public Page<PostDTO> getAll(Pageable pageable) {
-        // O findAll(pageable) já busca os dados paginados do banco
         Page<PostModel> postagens = repository.findAll(pageable);
-        // O Page do Spring possui um metodo .map()
-         return postagens.map(mapper::toPostDTO);
+        return postagens.map(mapper::toPostDTO);
     }
 
     // READ BY ID
     public PostDTO getById(Long id) {
-        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+        PostModel postEncontrado = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
         return mapper.toPostDTO(postEncontrado);
     }
 
-    // UPDATE
-    public PostDTO update(Long id, PostDTO postDTO){
-        PostModel postEncontrado = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+    // UPDATE: Atualiza os dados diretamente no registro recuperado do banco
+    public PostDTO update(Long id, PostDTO postDTO) {
+        PostModel postEncontrado = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-        PostModel postAtualizado = mapper.toPostModel(postDTO);
-        postAtualizado.setId(id);
-        postAtualizado = repository.save(postAtualizado);
+        // Atualiza apenas as propriedades alteráveis
+        postEncontrado.setTitle(postDTO.getTitle());
+        postEncontrado.setDescription(postDTO.getDescription());
+        postEncontrado.setCategory(postDTO.getCategory());
 
-        return mapper.toPostDTO(postAtualizado);
+        PostModel postSalvo = repository.save(postEncontrado);
+
+        return mapper.toPostDTO(postSalvo);
     }
 
     // DELETE
     public void delete(Long id){
         if(!repository.existsById(id)){
-            throw new ResourceNotFoundException("Post not found with id: " +id);
+            throw new ResourceNotFoundException("Post not found with id: " + id);
         }
-
         repository.deleteById(id);
     }
-
 }

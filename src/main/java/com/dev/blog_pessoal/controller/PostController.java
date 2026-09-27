@@ -2,15 +2,16 @@ package com.dev.blog_pessoal.controller;
 
 import com.dev.blog_pessoal.dto.PostDTO;
 import com.dev.blog_pessoal.service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/post")
@@ -40,19 +41,20 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> create(@RequestBody PostDTO postagem){
-        PostDTO postCriado = service.create(postagem);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(postCriado);
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostDTO postagem, Authentication authentication){
+        String userEmail = authentication.getName();
+        PostDTO postCriado = service.create(postagem, userEmail);
+        return ResponseEntity.status(HttpStatus.CREATED).body(postCriado);
     }
 
     @PutMapping("/{id}")
-    public PostDTO update(@PathVariable Long id, @RequestBody PostDTO postagemAtualizada){
-        return service.update(id, postagemAtualizada);
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostDTO postagemAtualizada) {
+        PostDTO postAtualizado = service.update(id, postagemAtualizada);
+        return ResponseEntity.ok(postAtualizado);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id){
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

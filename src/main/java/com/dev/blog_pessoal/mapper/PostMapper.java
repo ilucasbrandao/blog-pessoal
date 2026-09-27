@@ -2,6 +2,7 @@ package com.dev.blog_pessoal.mapper;
 
 import com.dev.blog_pessoal.dto.PostDTO;
 import com.dev.blog_pessoal.model.PostModel;
+import com.dev.blog_pessoal.model.User;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -9,7 +10,7 @@ import java.time.OffsetDateTime;
 @Component
 public class PostMapper {
 
-    public PostModel toPostModel(PostDTO postDTO){
+    public PostModel toPostModel(PostDTO postDTO, User user) {
         PostModel postModel = new PostModel();
 
         postModel.setId(postDTO.getId());
@@ -17,6 +18,7 @@ public class PostMapper {
         postModel.setDescription(postDTO.getDescription());
         postModel.setDataCriacao(postDTO.getDataCriacao());
         postModel.setCategory(postDTO.getCategory());
+        postModel.setUser(user);
 
         return postModel;
     }
