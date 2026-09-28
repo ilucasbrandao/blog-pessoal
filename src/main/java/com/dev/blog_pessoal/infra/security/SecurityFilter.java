@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.Collections;
  * Filtro personalizado que estende OncePerRequestFilter.
  * Isso garante que ele rode exatamente UMA vez para cada requisição HTTP que chegar à API.
  */
+@Component
 public class SecurityFilter extends OncePerRequestFilter {
 
     // Dependências necessárias para validar o token e buscar o usuário no banco
@@ -51,7 +53,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
             // Cria o objeto de autenticação oficial do Spring Security contendo o usuário, credenciais (null) e permissões
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
+            var authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 
             // Salva essa autenticação no Contexto do Spring. A partir desta linha, o Spring sabe QUEM está logado
             SecurityContextHolder.getContext().setAuthentication(authentication);
